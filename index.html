@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chess AI Helper — Powered by Stockfish 17</title>
+    <meta
+      name="description"
+      content="Asisten catur berbasis Stockfish AI. Rekomendasi gerakan terbaik untuk putih dan hitam di setiap giliran."
+    />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- chess.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <!-- chessboard.js -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow"></div>
+
+    <!-- Header -->
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-icon">♚</span>
+          <span class="logo-text">Chess <span class="accent">AI</span></span>
+          <span class="engine-badge">Stockfish 17</span>
+        </div>
+        <div class="header-controls">
+          <div class="mode-toggle">
+            <label class="toggle-label">Mode:</label>
+            <select id="gameModeSelect">
+              <option value="suggest">AI Assistant</option>
+              <option value="play_white">Main sebagai Putih</option>
+              <option value="play_black">Main sebagai Hitam</option>
+            </select>
+          </div>
+          <div class="elo-control" id="eloControl" style="display: none">
+            <label class="toggle-label">Kekuatan Elo:</label>
+            <input
+              type="range"
+              id="eloRange"
+              min="500"
+              max="3200"
+              value="1500"
+              step="100"
+            />
+            <span id="eloValue">1500</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="main-layout">
+      <!-- Left Panel: Board -->
+      <section class="board-section">
+        <div class="board-wrapper">
+          <div id="chessboard"></div>
+        </div>
+        <div class="board-controls">
+          <button id="btnNewGame" class="btn btn-primary">
+            <span>⟳</span> Game Baru
+          </button>
+          <button id="btnFlipBoard" class="btn btn-secondary">
+            <span>⇅</span> Putar Papan
+          </button>
+          <button id="btnUndoMove" class="btn btn-secondary">
+            <span>←</span> Undo
+          </button>
+          <div class="think-time">
+            <label>Waktu Pikir:</label>
+            <select id="thinkTimeSelect">
+              <option value="500">0.5 detik</option>
+              <option value="1000" selected>1 detik</option>
+              <option value="2000">2 detik</option>
+              <option value="5000">5 detik</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Info -->
+      <aside class="info-panel">
+        <!-- Turn & Status -->
+        <div class="panel-card status-card">
+          <div class="status-header">
+            <div id="turnIndicator" class="turn-indicator white-turn">
+              <span class="turn-dot"></span>
+              <span id="turnText">Giliran Putih</span>
+            </div>
+            <div id="moveCounter" class="move-counter">Gerakan 1</div>
+          </div>
+          <div id="gameStatus" class="game-status"></div>
+        </div>
+
+        <!-- Evaluation Bar -->
+        <div class="panel-card eval-card">
+          <div class="panel-title">📊 Evaluasi Posisi</div>
+          <div class="eval-bar-wrapper">
+            <div class="eval-bar-track">
+              <div
+                id="evalBarFill"
+                class="eval-bar-fill"
+                style="width: 50%"
+              ></div>
+            </div>
+            <div class="eval-labels">
+              <span>Hitam</span>
+              <span id="evalScore" class="eval-score">0.00</span>
+              <span>Putih</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Recommendation -->
+        <div class="panel-card recommendation-card">
+          <div class="panel-title">
+            🤖 Rekomendasi AI
+            <span
+              id="aiThinking"
+              class="thinking-indicator"
+              style="display: none"
+            >
+              <span class="dot-pulse"></span> Menganalisis...
+            </span>
+          </div>
+
+          <div id="bestMoveDisplay" class="best-move-display">
+            <div class="best-move-idle">Tunggu giliran...</div>
+          </div>
+
+          <div id="multiPVList" class="multipv-list"></div>
+
+          <div class="highlight-toggle">
+            <label>
+              <input type="checkbox" id="autoHighlight" checked />
+              Highlight gerakan terbaik
+            </label>
+            <label>
+              <input type="checkbox" id="autoPlay" />
+              Auto-play AI
+            </label>
+          </div>
+        </div>
+
+        <!-- Move History -->
+        <div class="panel-card history-card">
+          <div class="panel-title">📝 Riwayat Gerakan</div>
+          <div id="moveHistory" class="move-history">
+            <div class="history-idle">Belum ada gerakan</div>
+          </div>
+          <button id="btnCopyPGN" class="btn btn-outline btn-sm">
+            📋 Copy PGN
+          </button>
+        </div>
+      </aside>
+    </main>
+
+    <script src="js/chess-app.js"></script>
+  </body>
+</html>

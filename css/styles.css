@@ -188,6 +188,8 @@ select option {
   box-shadow: var(--shadow);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  animation: springIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+  animation-delay: 0.1s;
 }
 #chessboard {
   width: 100% !important;
@@ -221,6 +223,8 @@ select option {
   padding: 12px 16px;
   border-radius: 12px;
   backdrop-filter: blur(20px);
+  animation: springIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+  animation-delay: 0.2s;
 }
 .think-time {
   display: flex;
@@ -282,6 +286,17 @@ select option {
   gap: 20px;
 }
 
+@keyframes springIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .panel-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -291,9 +306,15 @@ select option {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition:
-    transform 0.3s ease,
+    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
     box-shadow 0.3s ease;
+  animation: springIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
 }
+.panel-card:nth-child(1) { animation-delay: 0.2s; }
+.panel-card:nth-child(2) { animation-delay: 0.3s; }
+.panel-card:nth-child(3) { animation-delay: 0.4s; }
+.panel-card:nth-child(4) { animation-delay: 0.5s; }
+.panel-card:nth-child(5) { animation-delay: 0.6s; }
 .panel-card:hover {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   border-color: rgba(255, 255, 255, 0.12);
@@ -446,7 +467,7 @@ select option {
   border-radius: 12px;
   padding: 12px 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
 }

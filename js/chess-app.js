@@ -113,6 +113,9 @@ function initBoard() {
   const cfg = {
     draggable: true,
     position: "start",
+    moveSpeed: 300,
+    snapbackSpeed: 400,
+    snapSpeed: 150,
     onDragStart: onDragStart,
     onDrop: onDrop,
     onSnapEnd: onSnapEnd,

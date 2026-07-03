@@ -1,175 +1,298 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chess AI Helper — Powered by Stockfish 17</title>
-    <meta
-      name="description"
-      content="Asisten catur berbasis Stockfish AI. Rekomendasi gerakan terbaik untuk putih dan hitam di setiap giliran."
-    />
-
-    <!-- Fonts -->
+    <title>Chess Course — Learn Chess with AI Power</title>
+    <meta name="description" content="Master chess with structured courses and Stockfish 17 AI analysis. Free, no sign-up required." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- chess.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    <!-- chessboard.js -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css"
-    />
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/landing.css" />
   </head>
   <body>
-    <div class="bg-glow"></div>
-
-    <!-- Header -->
-    <header class="site-header">
-      <div class="header-inner">
-        <div class="logo">
-          <span class="logo-icon">♚</span>
-          <span class="logo-text">Chess <span class="accent">AI</span></span>
-          <span class="engine-badge">Stockfish 17</span>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-logo">
+          <span class="nav-logo-icon"><i data-lucide="crown"></i></span>
+          <span class="nav-logo-text">Chess<span class="accent">Course</span></span>
+          <span class="nav-badge">AI-Powered</span>
+        </a>
+        <div class="nav-links">
+          <a href="index.html" class="active">Home</a>
+          <a href="#courses">Courses</a>
+          <a href="#features">Features</a>
+          <a href="analyzer.html">AI Analyzer</a>
         </div>
-        <div class="header-controls">
-          <div class="mode-toggle">
-            <label class="toggle-label">Mode:</label>
-            <select id="gameModeSelect">
-              <option value="suggest">AI Assistant</option>
-              <option value="play_white">Main sebagai Putih</option>
-              <option value="play_black">Main sebagai Hitam</option>
-            </select>
+        <a href="analyzer.html" class="nav-cta">Open Analyzer ↗</a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <div class="hero-badge fade-up">AI-Powered Chess Learning Platform</div>
+          <h1 class="hero-title fade-up delay-1">
+            Master Chess <span class="highlight-text">with AI Intelligence</span>
+          </h1>
+          <p class="hero-desc fade-up delay-2">
+            Learn from structured courses designed for all levels, then sharpen your skills
+            with real-time analysis from <strong>Stockfish 17</strong> — the world's strongest chess engine.
+          </p>
+          <div class="hero-actions fade-up delay-3">
+            <a href="#courses" class="btn-hero-primary">Browse Courses</a>
+            <a href="analyzer.html" class="btn-hero-secondary">Try AI Analyzer ↗</a>
           </div>
-          <div class="elo-control" id="eloControl" style="display: none">
-            <label class="toggle-label">Kekuatan Elo:</label>
-            <input
-              type="range"
-              id="eloRange"
-              min="500"
-              max="3200"
-              value="1500"
-              step="100"
-            />
-            <span id="eloValue">1500</span>
+        </div>
+
+        <div class="hero-visual fade-up delay-2">
+          <div class="hero-board-wrap">
+            <!-- Chess board (CSS conic-gradient) + pieces rendered by JS -->
+            <div class="hero-board" id="heroBoardEl"></div>
+
+            <!-- Floating analysis card -->
+            <div class="analysis-mockup">
+              <div class="am-label">AI Recommendation</div>
+              <div class="am-moves">
+                <div class="am-move-row">
+                  <span class="am-badge best">Best</span>
+                  <span class="am-move-san">e4</span>
+                  <span class="am-score">+0.91</span>
+                </div>
+                <div class="am-move-row">
+                  <span class="am-badge excellent">Excellent</span>
+                  <span class="am-move-san">Nf3</span>
+                  <span class="am-score">+0.55</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </header>
+    </section>
 
-    <!-- Main Layout -->
-    <main class="main-layout">
-      <!-- Left Panel: Board -->
-      <section class="board-section">
-        <div class="board-wrapper">
-          <div id="chessboard"></div>
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stats-inner">
+        <div class="stat-item">
+          <span class="stat-icon"><i data-lucide="book-open"></i></span>
+          <span class="stat-text"><strong>4 Courses</strong> — Beginner to advanced</span>
         </div>
-        <div class="board-controls">
-          <button id="btnNewGame" class="btn btn-primary">
-            <span>⟳</span> Game Baru
-          </button>
-          <button id="btnFlipBoard" class="btn btn-secondary">
-            <span>⇅</span> Putar Papan
-          </button>
-          <button id="btnUndoMove" class="btn btn-secondary">
-            <span>←</span> Undo
-          </button>
-          <div class="think-time">
-            <label>Waktu Pikir:</label>
-            <select id="thinkTimeSelect">
-              <option value="500">0.5 detik</option>
-              <option value="1000" selected>1 detik</option>
-              <option value="2000">2 detik</option>
-              <option value="5000">5 detik</option>
-            </select>
+        <div class="stat-item">
+          <span class="stat-icon"><i data-lucide="cpu"></i></span>
+          <span class="stat-text">Powered by <strong>Stockfish 17</strong></span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon"><i data-lucide="zap"></i></span>
+          <span class="stat-text"><strong>Real-time</strong> position analysis</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon"><i data-lucide="unlock"></i></span>
+          <span class="stat-text"><strong>100% Free</strong> — No sign-up</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <section class="section" id="features">
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="section-label">Why Chess Course</div>
+          <h2 class="section-title">Everything You Need to Improve</h2>
+          <p class="section-desc">From opening theory to endgame technique, powered by the strongest chess engine available.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon fi-purple"><i data-lucide="brain-circuit"></i></div>
+            <div class="feature-title">AI-Powered Analysis</div>
+            <p class="feature-desc">Get instant best-move recommendations with multi-line analysis from Stockfish 17. See the top 3 moves with score and continuation.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon fi-teal"><i data-lucide="library"></i></div>
+            <div class="feature-title">Structured Lessons</div>
+            <p class="feature-desc">Follow curated courses built around proven chess principles — openings, tactics, strategy, and endgame technique.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon fi-amber"><i data-lucide="swords"></i></div>
+            <div class="feature-title">Practice Instantly</div>
+            <p class="feature-desc">Jump into the AI Analyzer anytime. Play against the engine at adjustable Elo strength, or use it as a training partner.</p>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- Right Panel: Info -->
-      <aside class="info-panel">
-        <!-- Turn & Status -->
-        <div class="panel-card status-card">
-          <div class="status-header">
-            <div id="turnIndicator" class="turn-indicator white-turn">
-              <span class="turn-dot"></span>
-              <span id="turnText">Giliran Putih</span>
+    <!-- Courses -->
+    <section class="section" id="courses" style="padding-top: 0;">
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="section-label">Courses</div>
+          <h2 class="section-title">Start Your Chess Journey</h2>
+          <p class="section-desc">Structured learning paths for every skill level. Click any course to practice with the AI Analyzer.</p>
+        </div>
+        <div class="courses-grid">
+
+          <div class="course-card">
+            <div class="course-card-top">
+              <div class="course-icon ci-green"><i data-lucide="compass"></i></div>
+              <div class="course-info">
+                <div class="course-title">Opening Fundamentals</div>
+                <p class="course-desc">Master the key principles of the opening: center control, piece development, king safety, and the most popular first moves like e4, d4, and the Sicilian.</p>
+              </div>
             </div>
-            <div id="moveCounter" class="move-counter">Gerakan 1</div>
-          </div>
-          <div id="gameStatus" class="game-status"></div>
-        </div>
-
-        <!-- Evaluation Bar -->
-        <div class="panel-card eval-card">
-          <div class="panel-title">📊 Evaluasi Posisi</div>
-          <div class="eval-bar-wrapper">
-            <div class="eval-bar-track">
-              <div
-                id="evalBarFill"
-                class="eval-bar-fill"
-                style="width: 50%"
-              ></div>
-            </div>
-            <div class="eval-labels">
-              <span>Hitam</span>
-              <span id="evalScore" class="eval-score">0.00</span>
-              <span>Putih</span>
+            <div class="course-card-bottom">
+              <span class="course-level level-beginner">Beginner</span>
+              <span class="course-lessons">8 lessons</span>
+              <a href="analyzer.html" class="course-btn">Start →</a>
             </div>
           </div>
+
+          <div class="course-card">
+            <div class="course-card-top">
+              <div class="course-icon ci-yellow"><i data-lucide="crosshair"></i></div>
+              <div class="course-info">
+                <div class="course-title">Tactics &amp; Combinations</div>
+                <p class="course-desc">Sharpen your tactical vision with patterns like forks, pins, skewers, discovered attacks, and mating combinations. Spot the winning move every time.</p>
+              </div>
+            </div>
+            <div class="course-card-bottom">
+              <span class="course-level level-intermediate">Intermediate</span>
+              <span class="course-lessons">12 lessons</span>
+              <a href="analyzer.html" class="course-btn">Start →</a>
+            </div>
+          </div>
+
+          <div class="course-card">
+            <div class="course-card-top">
+              <div class="course-icon ci-purple"><i data-lucide="map"></i></div>
+              <div class="course-info">
+                <div class="course-title">Positional Strategy</div>
+                <p class="course-desc">Go beyond tactics. Learn to evaluate pawn structures, identify weak squares, create outposts, and build long-term strategic advantages.</p>
+              </div>
+            </div>
+            <div class="course-card-bottom">
+              <span class="course-level level-advanced">Advanced</span>
+              <span class="course-lessons">10 lessons</span>
+              <a href="analyzer.html" class="course-btn">Start →</a>
+            </div>
+          </div>
+
+          <div class="course-card">
+            <div class="course-card-top">
+              <div class="course-icon ci-blue"><i data-lucide="flag"></i></div>
+              <div class="course-info">
+                <div class="course-title">Endgame Mastery</div>
+                <p class="course-desc">Convert your advantages into wins. Study king and pawn endings, rook endings, opposition, the square rule, and essential theoretical positions.</p>
+              </div>
+            </div>
+            <div class="course-card-bottom">
+              <span class="course-level level-all">All Levels</span>
+              <span class="course-lessons">10 lessons</span>
+              <a href="analyzer.html" class="course-btn">Start →</a>
+            </div>
+          </div>
+
         </div>
+      </div>
+    </section>
 
-        <!-- AI Recommendation -->
-        <div class="panel-card recommendation-card">
-          <div class="panel-title">
-            🤖 Rekomendasi AI
-            <span
-              id="aiThinking"
-              class="thinking-indicator"
-              style="display: none"
-            >
-              <span class="dot-pulse"></span> Menganalisis...
-            </span>
-          </div>
-
-          <div id="bestMoveDisplay" class="best-move-display">
-            <div class="best-move-idle">Tunggu giliran...</div>
-          </div>
-
-          <div id="multiPVList" class="multipv-list"></div>
-
-          <div class="highlight-toggle">
-            <label>
-              <input type="checkbox" id="autoHighlight" checked />
-              Highlight gerakan terbaik
-            </label>
-            <label>
-              <input type="checkbox" id="autoPlay" />
-              Auto-play AI
-            </label>
-          </div>
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="cta-inner">
+        <div class="section-label">Get Started</div>
+        <h2 class="cta-title">Ready to Elevate Your Game?</h2>
+        <p class="cta-desc">Jump straight into the AI Analyzer and start practicing. No account, no install — just you and the strongest chess engine in the world.</p>
+        <div class="cta-actions">
+          <a href="analyzer.html" class="btn-hero-primary">Open AI Analyzer</a>
+          <a href="#courses" class="btn-hero-secondary">Browse Courses</a>
         </div>
+      </div>
+    </section>
 
-        <!-- Move History -->
-        <div class="panel-card history-card">
-          <div class="panel-title">📝 Riwayat Gerakan</div>
-          <div id="moveHistory" class="move-history">
-            <div class="history-idle">Belum ada gerakan</div>
-          </div>
-          <button id="btnCopyPGN" class="btn btn-outline btn-sm">
-            📋 Copy PGN
-          </button>
+    <!-- Footer -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-logo">
+          <span><i data-lucide="crown"></i></span>
+          <span>Chess<span class="accent">Course</span></span>
         </div>
-      </aside>
-    </main>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="#courses">Courses</a>
+          <a href="analyzer.html">AI Analyzer</a>
+        </div>
+        <p class="footer-copy">Powered by Stockfish 17 · Free &amp; Open Source</p>
+      </div>
+    </footer>
 
-    <script src="js/chess-app.js"></script>
+    <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Render hero chess board (Ruy Lopez position after 1.e4 e5 2.Nf3 Nc6 3.Bb5)
+    (function() {
+      const board = document.getElementById('heroBoardEl');
+      if (!board) return;
+      const SQ = 40;
+      // col: a=0..h=7, row: rank8=0..rank1=7
+      const pieces = [
+        // Black back rank
+        {c:0,r:0,s:'♜'},{c:2,r:0,s:'♝'},{c:3,r:0,s:'♛'},{c:4,r:0,s:'♚'},
+        {c:5,r:0,s:'♝'},{c:6,r:0,s:'♞'},{c:7,r:0,s:'♜'},
+        // Black pawns (minus e7 which moved to e5)
+        {c:0,r:1,s:'♟'},{c:1,r:1,s:'♟'},{c:2,r:1,s:'♟'},{c:3,r:1,s:'♟'},
+        {c:5,r:1,s:'♟'},{c:6,r:1,s:'♟'},{c:7,r:1,s:'♟'},
+        // Black knight c6, black pawn e5
+        {c:2,r:2,s:'♞'},{c:4,r:3,s:'♟'},
+        // White bishop b5 (key Ruy Lopez move)
+        {c:1,r:3,s:'♗'},
+        // White knight f3, white pawn e4
+        {c:5,r:5,s:'♘'},{c:4,r:4,s:'♙'},
+        // White pawns (minus e2 which moved)
+        {c:0,r:6,s:'♙'},{c:1,r:6,s:'♙'},{c:2,r:6,s:'♙'},{c:3,r:6,s:'♙'},
+        {c:5,r:6,s:'♙'},{c:6,r:6,s:'♙'},{c:7,r:6,s:'♙'},
+        // White back rank
+        {c:0,r:7,s:'♖'},{c:1,r:7,s:'♘'},{c:2,r:7,s:'♗'},{c:3,r:7,s:'♕'},
+        {c:4,r:7,s:'♔'},{c:5,r:7,s:'♗'},{c:7,r:7,s:'♖'},
+      ];
+      // Highlight squares
+      const highlights = [
+        {c:4,r:4,cls:'board-hl hl-green'}, // e4
+        {c:1,r:3,cls:'board-hl hl-purple'}, // b5
+      ];
+      highlights.forEach(h => {
+        const el = document.createElement('div');
+        el.className = h.cls;
+        el.style.left = (h.c * SQ) + 'px';
+        el.style.top  = (h.r * SQ) + 'px';
+        board.appendChild(el);
+      });
+      pieces.forEach(p => {
+        const el = document.createElement('span');
+        el.className = 'board-piece';
+        el.style.left = (p.c * SQ) + 'px';
+        el.style.top  = (p.r * SQ) + 'px';
+        el.textContent = p.s;
+        board.appendChild(el);
+      });
+    })();
+
+    // Scroll-triggered fade animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.feature-card, .course-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(el);
+    });
+    // Add visible class handler
+    const styleEl = document.createElement('style');
+    styleEl.textContent = '.feature-card.visible, .course-card.visible { opacity:1 !important; transform:translateY(0) !important; }';
+    document.head.appendChild(styleEl);
+    </script>
   </body>
 </html>

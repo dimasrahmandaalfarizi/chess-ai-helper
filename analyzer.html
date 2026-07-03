@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Analyzer — Chess Course</title>
+    <meta name="description" content="Analyze chess positions with Stockfish 17. Get the best move recommendations for every position." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow"></div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="logo">
+          <a href="index.html" class="back-home" title="Back to Home">←</a>
+          <span class="logo-icon">♚</span>
+          <span class="logo-text">Chess <span class="accent">AI</span></span>
+          <span class="engine-badge">Stockfish 17</span>
+        </div>
+        <div class="header-controls">
+          <div class="mode-toggle">
+            <label class="toggle-label" for="gameModeSelect">Mode</label>
+            <select id="gameModeSelect">
+              <option value="suggest">AI Assistant</option>
+              <option value="play_white">Play as White</option>
+              <option value="play_black">Play as Black</option>
+            </select>
+          </div>
+          <div class="elo-control" id="eloControl" style="display: none">
+            <label class="toggle-label" for="eloRange">Elo</label>
+            <input type="range" id="eloRange" min="500" max="3200" value="1500" step="100" />
+            <span id="eloValue">1500</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <section class="board-section">
+        <div class="board-wrapper">
+          <div id="chessboard"></div>
+        </div>
+        <div class="board-controls">
+          <button id="btnNewGame" class="btn btn-primary"><span>↺</span> New Game</button>
+          <button id="btnFlipBoard" class="btn btn-secondary"><span>⇅</span> Flip</button>
+          <button id="btnUndoMove" class="btn btn-secondary"><span>←</span> Undo</button>
+          <div class="think-time">
+            <label for="thinkTimeSelect">Think Time</label>
+            <select id="thinkTimeSelect">
+              <option value="500">0.5s</option>
+              <option value="1000" selected>1s</option>
+              <option value="2000">2s</option>
+              <option value="5000">5s</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <aside class="info-panel">
+        <div class="panel-card status-card">
+          <div class="status-header">
+            <div id="turnIndicator" class="turn-indicator white-turn">
+              <span class="turn-dot"></span>
+              <span id="turnText">White's Turn</span>
+            </div>
+            <div id="moveCounter" class="move-counter">Move 1</div>
+          </div>
+          <div id="gameStatus" class="game-status"></div>
+        </div>
+
+        <div class="panel-card eval-card">
+          <div class="panel-title">Position Evaluation</div>
+          <div class="eval-bar-wrapper">
+            <div class="eval-bar-track">
+              <div id="evalBarFill" class="eval-bar-fill" style="width: 50%"></div>
+            </div>
+            <div class="eval-labels">
+              <span>Black</span>
+              <span id="evalScore" class="eval-score">0.00</span>
+              <span>White</span>
+            </div>
+            <div id="evalAdvantage" class="eval-advantage">Equal position</div>
+          </div>
+        </div>
+
+        <div class="panel-card recommendation-card">
+          <div class="panel-title">
+            AI Recommendation
+            <span id="aiThinking" class="thinking-indicator" style="display: none">
+              <span class="dot-pulse"></span> Analyzing
+            </span>
+          </div>
+          <div id="bestMoveDisplay" class="best-move-display"></div>
+          <div id="multiPVList" class="multipv-list"></div>
+          <div class="highlight-toggle">
+            <label><input type="checkbox" id="autoHighlight" checked /> Highlight best move</label>
+            <label><input type="checkbox" id="autoPlay" /> Auto-play AI</label>
+          </div>
+        </div>
+
+        <div class="panel-card history-card">
+          <div class="panel-title">Move History</div>
+          <div id="moveHistory" class="move-history">
+            <div class="history-idle">No moves yet</div>
+          </div>
+          <button id="btnCopyPGN" class="btn btn-outline btn-sm">Copy PGN</button>
+        </div>
+      </aside>
+    </main>
+
+    <script src="js/chess-app.js"></script>
+  </body>
+</html>

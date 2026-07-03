@@ -120,7 +120,7 @@ function initBoard() {
     onDrop: onDrop,
     onSnapEnd: onSnapEnd,
     pieceTheme:
-      "https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png",
+      "https://chessboardjs.com/img/chesspieces/alpha/{piece}.png",
   };
   board = Chessboard("chessboard", cfg);
   $(window).resize(() => board.resize());
@@ -159,7 +159,7 @@ function getAIMove(autoPlay = false) {
   isAnalyzing = true;
   $("#aiThinking").show();
   $("#bestMoveDisplay").html(
-    '<div class="best-move-idle">Menganalisis posisi...</div>',
+    '<div class="best-move-idle">Analyzing position...</div>',
   );
   $("#multiPVList").html("");
 
@@ -217,47 +217,63 @@ function applyAIMove(uciMove) {
   }
 }
 
-// ─── Move Classifications ──────────────────────────────────────────────────
-function classifyMove(lineScore, bestScore) {
-  const diff = Math.abs(bestScore - lineScore);
-
-  if (diff <= 10)
+// ─── Move Classifications (rank-based, honest) ─────────────────────────────
+function classifyMove(rankIndex) {
+  if (rankIndex === 0)
     return {
-      label: "✨ Brilliant",
-      class: "badge-brilliant",
-      hlClass: "highlight-brilliant",
+      label: "Best",
+      class: "badge-rank1",
+      hlClass: "highlight-rank1",
       rankClass: "rank-1",
     };
-  if (diff <= 60)
+  if (rankIndex === 1)
     return {
-      label: "👍 Great",
-      class: "badge-great",
-      hlClass: "highlight-great",
+      label: "Excellent",
+      class: "badge-rank2",
+      hlClass: "highlight-rank2",
       rankClass: "rank-2",
     };
-  if (diff <= 150)
+  if (rankIndex === 2)
     return {
-      label: "✅ Good",
-      class: "badge-good",
-      hlClass: "highlight-good",
+      label: "Good",
+      class: "badge-rank3",
+      hlClass: "highlight-rank3",
       rankClass: "rank-3",
     };
   return {
-    label: "🤔 Okay",
+    label: "Alt",
     class: "badge-neutral",
     hlClass: "highlight-to",
     rankClass: "",
   };
 }
 
-function handleHoverMove(uciMove, category) {
+// Convert a sequence of UCI moves to SAN from current game position
+function pvMovesToSAN(uciMoves, gameInstance) {
+  const testGame = new Chess(gameInstance.fen());
+  const sanMoves = [];
+  for (const uci of uciMoves) {
+    if (!uci || uci.length < 4) break;
+    const move = testGame.move({
+      from: uci.slice(0, 2),
+      to: uci.slice(2, 4),
+      promotion: uci[4] || undefined,
+    });
+    if (!move) break;
+    sanMoves.push(move.san);
+    if (sanMoves.length >= 4) break;
+  }
+  return sanMoves;
+}
+
+function handleHoverMove(uciMove, hlClass) {
   clearHoverHighlights();
   if (!uciMove) return;
   const from = uciMove.slice(0, 2);
   const to = uciMove.slice(2, 4);
-  $(`[data-square="${from}"]`).addClass(category.hlClass);
-  $(`[data-square="${to}"]`).addClass(category.hlClass);
-  hoverHighlightSqs = [from, to, category.hlClass];
+  $(`[data-square="${from}"]`).addClass(hlClass);
+  $(`[data-square="${to}"]`).addClass(hlClass);
+  hoverHighlightSqs = [from, to, hlClass];
 }
 
 function clearHoverHighlights() {
@@ -278,41 +294,34 @@ function renderRecommendation(bestUCI, linesData, turnIndicator) {
   $("#aiThinking").hide();
 
   const sortedLines = Object.values(linesData).sort((a, b) => {
-    // Sort by best score depending on turn
-    let sA = a.mate_in ? a.mate_in * 10000 : a.score_cp;
-    let sB = b.mate_in ? b.mate_in * 10000 : b.score_cp;
+    let sA = a.mate_in !== null ? (a.mate_in > 0 ? 30000 - a.mate_in : -30000 - a.mate_in) : a.score_cp;
+    let sB = b.mate_in !== null ? (b.mate_in > 0 ? 30000 - b.mate_in : -30000 - b.mate_in) : b.score_cp;
     return turnIndicator === "w" ? sB - sA : sA - sB;
   });
 
   if (sortedLines.length === 0) return;
 
-  const bestScore = sortedLines[0].score_cp;
-
   let html = "";
   sortedLines.forEach((line, i) => {
     if (!line.bestmove) return;
 
-    // Safety score flip relative to perspective
-    let relativeScore = turnIndicator === "w" ? line.score_cp : -line.score_cp;
-    let relativeBest = turnIndicator === "w" ? bestScore : -bestScore;
-
-    const category = classifyMove(relativeScore, relativeBest);
+    // Rank-based classification — honest and unambiguous
+    const category = classifyMove(i);
     const san = uciToSAN(line.bestmove);
     const sc = formatScore(line.score_cp, line.mate_in);
-    const scClass =
-      (relativeScore || 0) > 20
-        ? "positive"
-        : (relativeScore || 0) < -20
-          ? "negative"
-          : "neutral";
-    const pvPreview = (line.moves || []).slice(0, 4).join(" ");
 
-    const jsonCategory = JSON.stringify(category).replace(/"/g, "&quot;");
+    // Score color from white's perspective
+    const whiteScore = turnIndicator === "w" ? (line.score_cp || 0) : -(line.score_cp || 0);
+    const scClass = whiteScore > 20 ? "positive" : whiteScore < -20 ? "negative" : "neutral";
+
+    // Convert pv moves to SAN for clean display
+    const sanPV = pvMovesToSAN((line.moves || []).slice(1, 4), game);
+    const pvPreview = sanPV.length > 0 ? sanPV.join(" ") : "";
 
     html += `
-      <div class="pv-item ${category.rankClass}" 
+      <div class="pv-item ${category.rankClass}"
            onclick="applyAIMove('${line.bestmove}')"
-           onmouseenter="handleHoverMove('${line.bestmove}', ${jsonCategory})"
+           onmouseenter="handleHoverMove('${line.bestmove}', '${category.hlClass}')"
            onmouseleave="clearHoverHighlights()">
         <span class="pv-rank-badge ${category.class}">${category.label}</span>
         <span class="pv-move">${san || line.bestmove}</span>
@@ -323,13 +332,10 @@ function renderRecommendation(bestUCI, linesData, turnIndicator) {
 
   $("#multiPVList").html(html);
 
-  // Handle case where autoPlay was requested via mode
+  // Auto-play in play modes
   if ($("#gameModeSelect").val() === "play_white" && turnIndicator === "b") {
     applyAIMove(bestUCI);
-  } else if (
-    $("#gameModeSelect").val() === "play_black" &&
-    turnIndicator === "w"
-  ) {
+  } else if ($("#gameModeSelect").val() === "play_black" && turnIndicator === "w") {
     applyAIMove(bestUCI);
   }
 }
@@ -344,6 +350,15 @@ function updateEvalBar(cp, turn) {
   $("#evalBarFill").css("width", pctFill + "%");
   const scoreText = formatScore(whiteCp, null, true);
   $("#evalScore").text(scoreText);
+
+  // Advantage label
+  let advText = "Equal position";
+  const abs = Math.abs(whiteCp);
+  const side = whiteCp > 0 ? "White" : "Black";
+  if (abs >= 300) advText = `${side} is winning`;
+  else if (abs >= 150) advText = `${side} is better`;
+  else if (abs >= 50) advText = `${side} is slightly better`;
+  $("#evalAdvantage").text(advText);
 }
 
 // ─── Highlight Squares ─────────────────────────────────────────────────────
@@ -371,11 +386,12 @@ function recordMove(move) {
     moveHistory.push({ white: hist[i] || "", black: hist[i + 1] || "" });
   }
   renderHistory();
+  updateUndoBtn();
 }
 
 function renderHistory() {
   if (moveHistory.length === 0) {
-    $("#moveHistory").html('<div class="history-idle">Belum ada gerakan</div>');
+    $("#moveHistory").html('<div class="history-idle">No moves yet</div>');
     return;
   }
   let html = "";
@@ -402,19 +418,19 @@ function updateUI() {
   $turn.removeClass("white-turn black-turn");
   if (turn === "w") {
     $turn.addClass("white-turn");
-    $("#turnText").text("Giliran Putih ♙");
+    $("#turnText").text("White's Turn");
   } else {
     $turn.addClass("black-turn");
-    $("#turnText").text("Giliran Hitam ♟");
+    $("#turnText").text("Black's Turn");
   }
-  $("#moveCounter").text(`Gerakan ${moveNum}`);
+  $("#moveCounter").text(`Move ${moveNum}`);
 
   let status = "";
   if (game.in_checkmate())
-    status = `🏁 Skakmat! ${turn === "w" ? "Hitam" : "Putih"} menang`;
-  else if (game.in_stalemate()) status = "🤝 Remis — Stalemate";
-  else if (game.in_draw()) status = "🤝 Seri";
-  else if (game.in_check()) status = "⚠️ Skak!";
+    status = `🏁 Checkmate! ${turn === "w" ? "Black" : "White"} wins`;
+  else if (game.in_stalemate()) status = "🤝 Draw — Stalemate";
+  else if (game.in_draw()) status = "🤝 Draw";
+  else if (game.in_check()) status = "⚠️ Check!";
   $("#gameStatus").text(status);
 }
 
@@ -448,12 +464,14 @@ $("#btnNewGame").on("click", () => {
   clearHoverHighlights();
   renderHistory();
   updateUI();
+  updateUndoBtn();
   $("#bestMoveDisplay").html(
-    '<div class="best-move-idle">Tunggu giliran...</div>',
+    '<div class="best-move-idle">Waiting...</div>',
   );
   $("#multiPVList").html("");
   $("#evalBarFill").css("width", "50%");
   $("#evalScore").text("0.00");
+  $("#evalAdvantage").text("Posisi seimbang");
   $("#gameStatus").text("");
 
   if (gameMode === "play_black") setTimeout(() => getAIMove(true), 500);
@@ -462,16 +480,27 @@ $("#btnNewGame").on("click", () => {
 
 $("#btnFlipBoard").on("click", () => board.flip());
 
-$("#btnUndoMove").on("click", () => {
-  engine.postMessage("stop"); // stop current analysis
+// ─── Undo Logic ────────────────────────────────────────────────────────────
+function doUndo() {
+  // Nothing to undo
+  if (game.history().length === 0) return;
+
+  engine.postMessage("stop");
   isAnalyzing = false;
   $("#aiThinking").hide();
 
-  game.undo();
-  if (gameMode !== "suggest") game.undo();
-  board.position(game.fen());
+  // In play modes: undo both the user's move and the AI's preceding reply
+  // In suggest mode: undo one move at a time
+  const stepsToUndo = gameMode !== "suggest" ? 2 : 1;
+  for (let i = 0; i < stepsToUndo; i++) {
+    if (game.history().length > 0) game.undo();
+  }
+
+  board.position(game.fen(), false);
   clearHighlights();
   clearHoverHighlights();
+
+  // Rebuild move history from game
   const hist = game.history();
   moveHistory = [];
   for (let i = 0; i < hist.length; i += 2) {
@@ -479,16 +508,50 @@ $("#btnUndoMove").on("click", () => {
   }
   renderHistory();
   updateUI();
-  if (gameMode === "suggest") getAIMove(false);
+  updateUndoBtn();
+
+  // Flash the undo button as visual feedback
+  const $btn = $("#btnUndoMove");
+  $btn.addClass("btn-undo-flash");
+  setTimeout(() => $btn.removeClass("btn-undo-flash"), 300);
+
+  // Re-trigger analysis
+  if (!game.game_over()) {
+    setTimeout(() => getAIMove(gameMode !== "suggest"), 300);
+  } else {
+    $("#multiPVList").html("");
+  }
+}
+
+// Disable undo button when no history
+function updateUndoBtn() {
+  const $btn = $("#btnUndoMove");
+  if (game.history().length === 0) {
+    $btn.prop("disabled", true).addClass("btn-disabled");
+  } else {
+    $btn.prop("disabled", false).removeClass("btn-disabled");
+  }
+}
+
+$("#btnUndoMove").on("click", doUndo);
+
+// Ctrl+Z keyboard shortcut
+$(document).on("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+    e.preventDefault();
+    doUndo();
+  }
 });
+
 
 $("#btnCopyPGN").on("click", () => {
   navigator.clipboard
     .writeText(game.pgn())
     .then(() => {
       const $b = $("#btnCopyPGN");
-      $b.text("✅ Copied!");
-      setTimeout(() => $b.text("📋 Copy PGN"), 2000);
+      const orig = $b.text();
+      $b.text("Copied!");
+      setTimeout(() => $b.text(orig), 2000);
     })
     .catch(() => alert(game.pgn()));
 });
@@ -519,5 +582,6 @@ $("#autoPlay").on("change", function () {
 $(document).ready(() => {
   initBoard();
   updateUI();
+  updateUndoBtn();
   setTimeout(() => getAIMove(false), 800);
 });

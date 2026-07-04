@@ -21,12 +21,12 @@
 
 ## Features
 
-- ♟️ **AI-Powered Analysis**: Instant best-move recommendations with multi-line analysis powered by Stockfish 17.
-- 📖 **Structured Courses**: Curated learning paths covering opening fundamentals, tactics, strategy, and endgames.
-- ⚡ **Real-time Practice**: Play against the AI at adjustable Elo strengths or use the board as a free-form analyzer.
-- 🎨 **Premium UI**: Clean, developer-focused dark mode design. No "AI slop" or excessive visual noise.
-- 🧠 **Smart Move Classification**: Opening moves are intelligently ranked (Best, Excellent, Good) rather than relying purely on centipawn loss.
-- 📋 **SAN Conversion**: Outputs Standard Algebraic Notation (SAN) instead of raw UCI for better readability.
+-  **AI-Powered Analysis**: Instant best-move recommendations with multi-line analysis powered by Stockfish 17.
+-  **Structured Courses**: Curated learning paths covering opening fundamentals, tactics, strategy, and endgames.
+-  **Real-time Practice**: Play against the AI at adjustable Elo strengths or use the board as a free-form analyzer.
+-  **Premium UI**: Clean, developer-focused dark mode design. No "AI slop" or excessive visual noise.
+-  **Smart Move Classification**: Opening moves are intelligently ranked (Best, Excellent, Good) rather than relying purely on centipawn loss.
+-  **SAN Conversion**: Outputs Standard Algebraic Notation (SAN) instead of raw UCI for better readability.
 
 ## Local Development
 
